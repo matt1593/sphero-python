@@ -5,6 +5,7 @@ import logging
 import glob
 
 import request
+import reception
 
 
 class SpheroError(Exception):
@@ -37,6 +38,8 @@ class Sphero(object):
         while True:
             try:
                 self.sp = serial.Serial(self.path, 115200)
+                self.reception=reception.Reception(self.sp)
+                self.reception.start()
                 return
             except serial.serialutil.SerialException:
                 logging.info('retrying')
@@ -50,12 +53,18 @@ class Sphero(object):
         if self.seq == 0xFF:
             self.seq = 0x00
 
-        header = struct.unpack('5B', self.sp.read(5))
-        body = self.sp.read(header[-1])
+        res=self.reception.getResponse()
+        header=res[0]
+        body=res[1]
+
+#        header = struct.unpack('5B', self.sp.read(5))
+#        body = self.sp.read(header[-1])
 
         response = packet.response(header, body)
-
         if response.success:
+            name = packet.__class__.__name__.split('.')[-1]
+            if name=="Sleep":
+                self.reception.stop()
             return response
         else:
             raise SpheroError('request failed (request: %s:%s, response: %s:%s)' % (header, repr(body), response.header, repr(response.body)))
@@ -102,11 +111,11 @@ class Sphero(object):
     def get_power_state(self):
         return self.write(request.GetPowerState(self.seq))
 
-    def set_power_notification(self):
-        raise NotImplementedError
+    def set_power_notification(self, state=False):
+        return self.write(request.SetPowerNotification(self.seq,"B",0x01 if state else 0x00))
 
     def sleep(self, wakeup=0, macro=0, orbbasic=0):
-        return self.write(request.Sleep(self.seq,"!HB!H", wakeup, macro, orbbasic))
+        return self.write(request.Sleep(self.seq,"!HBH", wakeup, macro, orbbasic))
 
     def get_voltage_trip_points(self):
         return self.write(request.GetVoltageTripPoints(self.seq))
@@ -121,7 +130,7 @@ class Sphero(object):
         return self.write(request.JumpToBootloader(self.seq))
 
     def perform_level_1_diagnostics(self):
-        raise NotImplementedError
+        return self.write(request.PerformLevel1Diagnostics(self.seq))
 
     def perform_level_2_diagnostics(self):
         raise NotImplementedError
@@ -164,9 +173,6 @@ class Sphero(object):
     def get_chassis_id(self):
         return self.write(request.GetChassisId(self.seq))
 
-    def set_chassis_id(self,id):
-        return self.write(request.SetChassisId(self.seq,"!H",id&ffff))
-
     def self_level(self):
         raise NotImplementedError
 
@@ -186,7 +192,7 @@ class Sphero(object):
         heading can have value between 0 and 359 
         
         """
-        return self.write(request.Roll(self.seq,"B!HB", speed, heading, state ))
+        return self.write(request.Roll(self.seq,"!BHB", speed, heading, state ))
 
     def set_boost_with_time(self):
         raise NotImplementedError
