@@ -41,50 +41,50 @@ class Reception(threading.Thread):
                     print body[:-1]
                 elif header[2]== 0x03:
                     #sensor data streaming
-                    print toto
+                    print self.data
                 elif header[2]== 0x04:
                     #config block contents
-                    print toto
+                    print self.data
                 elif header[2]== 0x05:
                     #pre-sleep warning (10sec)
                     self.stop()
                     print "sleep"
                 elif header[2]== 0x06:
                     #Macro markers
-                    print toto
+                    print self:x.data
                 elif header[2]== 0x07:
                     #Collision detected
-                    print toto
+                    print self.data
                 elif header[2]== 0x08:
                     #orbBasic PRINT message
-                    print toto
+                    print self.data
                 elif header[2]== 0x09:
                     #orbBasic error message, ASCII
-                    print toto
+                    print self.data
                 elif header[2]== 0x0A:
                     #orbBasic error message, binary
-                    print toto
+                    print self.data
                 elif header[2]== 0x0B:
                     #Self Level Result
-                    print toto
+                    print self.data
                 elif header[2]== 0x0C:
                     #Gyro axis limit exceeded 
-                    print toto
+                    print self.data
                 elif header[2]== 0x0D:
                     #Sphero's soul data
-                    print toto
+                    print self.data
                 elif header[2]== 0x0E:
                     #Level up notification
-                    print toto
+                    print self.data
                 elif header[2]== 0x0F:
                     #Shield damage notification
-                    print toto
+                    print self.data
                 elif header[2]== 0x10:
                     #XP update notification
-                    print toto
+                    print self.data
                 elif header[2]== 0x11:
                     #Boost update notification
-                    print toto
+                    print self.data
         
 
     def stop(self):

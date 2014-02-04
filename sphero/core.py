@@ -46,6 +46,10 @@ class Sphero(object):
                 if not retry:
                     raise SpheroError('failed to connect after %d tries' % (tries-retry))
                 retry -= 1
+    def disconnect(self):
+        self.reception.stop()
+        self.ping()
+        self.sp.close()
 
     def write(self, packet):
         self.sp.write(str(packet))
